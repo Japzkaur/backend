@@ -1,0 +1,37 @@
+name: Deploy Backend API to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Pull & Reload PM2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Backend EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}       # 13.212.225.231
+          username: ${{ secrets.EC2_USER }}   # ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}     # Private key content (.pem)
+          port: 22
+          script_stop: true
+          script: |
+            echo "🚀 Starting deployment for Backend API..."
+            cd /var/www/backend
+
+            # 1. Fetch latest changes from GitHub
+            git fetch origin main
+            git reset --hard origin/main
+
+            # 2. Install dependencies (including production packages)
+            npm install
+
+            # 3. Reload application zero-downtime with PM2
+            pm2 reload inquiry-backend --update-env || pm2 restart inquiry-backend --update-env
+            pm2 save
+
+            echo "✅ Backend API successfully deployed and reloaded on Port 5000!"
