@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+<<<<<<< HEAD
   # MongoDB 7.0 Service with Persistent Volume
   mongodb:
     image: mongo:7.0
@@ -38,11 +39,47 @@ services:
         condition: service_healthy
     networks:
       - backend-net
+=======
+  mongodb:
+    image: mongo:7.0
+    container_name: inquiry_mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: inquiry_db
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app_network
+    ports:
+      - "27017:27017" # optional, for direct mongosh access
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: inquiry_backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/inquiry_db
+      - FRONTEND_ORIGIN=*
+    depends_on:
+      - mongodb
+    networks:
+      - app_network
+>>>>>>> f3d92e231048a581ed34be51a54cc8f61e5ebbb4
 
 volumes:
   mongo_data:
     driver: local
 
 networks:
+<<<<<<< HEAD
   backend-net:
     driver: bridge
+=======
+  app_network:
+    driver: bridge
+>>>>>>> f3d92e231048a581ed34be51a54cc8f61e5ebbb4
